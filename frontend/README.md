@@ -1,16 +1,19 @@
-# React + Vite
+# BuildGen AI frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Run locally
 
-Currently, two official plugins are available:
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` to `.env.local` and set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`.
+3. Run `npm run dev`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Use the Supabase project's **anon/publishable key** only. Never put its service-role key in a `VITE_*` variable or in frontend code.
 
-## React Compiler
+## Supabase requirements
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Storage bucket: `building-documents`.
+- `public.buildings` must contain `id`, `name`, `pdf_path`, `status`, and `building_json`.
+- Allow the anon role to upload objects to `building-documents` and insert rows into `buildings`.
+- Enable Realtime for `public.buildings`; allow the anon role to read the row updates needed for the active project.
+- The Colab worker uses its service-role key and must be able to read uploaded objects and update `buildings`.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The browser uploads a PDF to `pdfs/<uuid>.pdf`, inserts its `buildings` row with status `uploaded`, and listens for status updates. `processing` keeps the progress indicator active, `completed` maps the generated levels and rooms into the 3D viewer, and `error` displays the worker's error. Supabase setup and policies are managed separately from this frontend.
